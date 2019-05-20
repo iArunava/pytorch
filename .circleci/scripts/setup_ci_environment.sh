@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-set -eux -o pipefail
+set -ex -o pipefail
 
 # Check if we should actually run
 echo "BUILD_ENVIRONMENT: ${BUILD_ENVIRONMENT}"
-echo "CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST}"
+echo "CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST:-}"
 if [[ "${BUILD_ENVIRONMENT}" == *-slow-* ]]; then
   if ! [ -z "${CIRCLE_PULL_REQUEST:-}" ]; then
     # It's a PR; test for [slow ci] tag on the TOPMOST commit
@@ -83,7 +83,7 @@ fi
 
 if [[ "${BUILD_ENVIRONMENT}" == *-build ]]; then
   echo "declare -x IN_CIRCLECI=1" > /home/circleci/project/env
-  echo "declare -x COMMIT_SOURCE=${CIRCLE_BRANCH}" >> /home/circleci/project/env
+  echo "declare -x COMMIT_SOURCE=${CIRCLE_BRANCH:-}" >> /home/circleci/project/env
   echo "declare -x PYTHON_VERSION=${PYTHON_VERSION:-}" >> /home/circleci/project/env
   echo "declare -x SCCACHE_BUCKET=ossci-compiler-cache-circleci-v2" >> /home/circleci/project/env
   if [ -n "${USE_CUDA_DOCKER_RUNTIME:-}" ]; then

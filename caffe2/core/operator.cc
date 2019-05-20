@@ -29,8 +29,14 @@ C10_DEFINE_bool(
 C10_DEFINE_bool(
     caffe2_operator_throw_if_fp_exceptions,
     false,
-    "If set, throws if floating point exceptions (FE_DIVBYZERO, FE_INVALID, "
-    "FE_OVERFLOW) are detected when running any operator.");
+    "If set, throws if floating point exceptions (FE_DIVBYZERO, FE_INVALID) "
+    "are detected when running any operator. FE_OVERFLOW is handled separately "
+    "by caffe2_operator_throw_if_fp_overflow_exceptions option.");
+C10_DEFINE_bool(
+    caffe2_operator_throw_if_fp_overflow_exceptions,
+    false,
+    "If set, throws if floating point exception FE_OVERFLOW is detected when "
+    "running any operator.");
 
 namespace caffe2 {
 
@@ -581,11 +587,18 @@ TensorShapes InferBlobShapesAndTypes(
   return tps;
 }
 
-void LoadInt8TensorInfoOfBlob(float* scale, float* offset, const Blob* b) {
-  const int8::Int8TensorCPU* i8tc =
+void LoadInt8TensorInfoOfBlob(
+    std::vector<float>* scale,
+    std::vector<float>* offset,
+    uint32_t* axis,
+    const Blob* b) {
+  const int8::Int8TensorCPU* int8_tensor =
       static_cast<const int8::Int8TensorCPU*>(b->GetRaw());
-  *scale = i8tc->scale;
-  *offset = i8tc->zero_point;
+  scale->clear();
+  offset->clear();
+  scale->push_back(int8_tensor->scale);
+  offset->push_back(int8_tensor->zero_point);
+  *axis = 1;
 }
 
 TensorShape GetTensorShapeOfBlob(const Blob* b) {

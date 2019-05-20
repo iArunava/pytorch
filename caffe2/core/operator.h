@@ -31,6 +31,7 @@
 #endif
 
 C10_DECLARE_bool(caffe2_operator_throw_if_fp_exceptions);
+C10_DECLARE_bool(caffe2_operator_throw_if_fp_overflow_exceptions);
 
 namespace c10 {
 struct FunctionSchema;
@@ -894,6 +895,8 @@ class Operator : public OperatorBase {
         CAFFE_ENFORCE(
             !std::fetestexcept(FE_INVALID),
             "Invalid floating point exception (FE_INVALID) reported.");
+      }
+      if (FLAGS_caffe2_operator_throw_if_fp_overflow_exceptions) {
         CAFFE_ENFORCE(
             !std::fetestexcept(FE_OVERFLOW),
             "Overflow floating point exception (FE_OVERFLOW) reported.");
@@ -1392,8 +1395,11 @@ CAFFE2_API void SetOpEnginePref(
     const std::string& op_type,
     const CaffeMap<DeviceType, EnginePrefType>& op_pref);
 
-CAFFE2_API void
-LoadInt8TensorInfoOfBlob(float* scale, float* offset, const Blob* b);
+CAFFE2_API void LoadInt8TensorInfoOfBlob(
+    std::vector<float>* scale,
+    std::vector<float>* offset,
+    uint32_t* axis,
+    const Blob* b);
 
 CAFFE2_API TensorShape GetTensorShapeOfBlob(const Blob* b);
 
