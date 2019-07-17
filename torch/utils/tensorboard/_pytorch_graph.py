@@ -6,7 +6,9 @@ from tensorboard.compat.proto.step_stats_pb2 import StepStats, DeviceStepStats
 from tensorboard.compat.proto.versions_pb2 import VersionDef
 
 import torch
+import logging
 from ._proto_graph import node_proto
+
 
 methods_OP = ['attributeNames', 'hasMultipleOutputs', 'hasUses', 'inputs',
               'kind', 'outputs', 'outputsSize', 'scopeName']
